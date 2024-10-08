@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Map Explorer</title>
+    <title>Home - WTG</title>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
@@ -27,7 +27,7 @@
         /* Background gradient for the hero section */
         .hero {
             height: 100vh;
-            background: linear-gradient(135deg, #6A0DAD, #D3D3D3);
+            background: linear-gradient(0deg, rgba(71,195,34,1) 0%, rgba(255,255,255,1) 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -53,7 +53,7 @@
         }
 
         nav h1 {
-            color: white;
+            color: rgb(0, 0, 0);
             font-size: 24px;
         }
 
@@ -69,7 +69,7 @@
         }
 
         nav ul li a {
-            color: white;
+            color: rgb(0, 0, 0);
             text-decoration: none;
             font-weight: 600;
         }
@@ -94,7 +94,7 @@
         .hero a {
             padding: 15px 40px;
             background-color: white;
-            color: #007BFF;
+            color: #5faa4a;
             font-size: 18px;
             font-weight: bold;
             border-radius: 50px;
@@ -104,7 +104,7 @@
         }
 
         .hero a:hover {
-            background-color: #0056b3;
+            background-color: #1d7c3d;
             color: white;
         }
 
@@ -130,7 +130,7 @@
 
         /* Footer */
         footer {
-            background-color: #007BFF;
+            background-color: #47c322;
             color: white;
             padding: 20px 0;
             text-align: center;
@@ -156,34 +156,34 @@
 
     <!-- Navigation Bar -->
     <nav>
-        <h1>Map Explorer</h1>
+        <h1>Where to Go (WTG)</h1>
         <ul>
-            <li><a href="homepage.html">Home</a></li>
-            <li><a href="map.html">Map</a></li>
+            <li><a href="{{ url_for('homepage') }}">Home</a></li>
+            <li><a href="{{ url_for('index') }}">Map</a></li>
             <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
+            
         </ul>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-        <h1>Stay Connected & Explore the World</h1>
-        <p>Explore maps with powerful geolocation, search, and real-time features</p>
-        <a href="map.html">Get Started</a>
+        <h1>Manatiling Konektado sa Mundo!</h1>
+        <p>Siyasatin ang mapa na may makapangyarihan na katangian tulad ng <br> geolocation, search, measure distance at real-time location.</p>
+        <a href="{{ url_for('index') }}">Magsimula</a>
     </section>
 
     <!-- About Section -->
     <section class="about" id="about">
-        <h3>About Map Explorer</h3>
+        <h3>About Where to Go (WTG)</h3>
         <p>
-            Map Explorer provides a secure and seamless way to explore maps with various layers, real-time tracking, and more.
+            WTG provides a secure and seamless way to explore maps with various layers, real-time tracking, search map, and measure distance.
             Our app makes it easy for users to navigate the world, get directions, and stay connected wherever they are.
         </p>
     </section>
 
     <!-- Footer -->
     <footer id="contact">
-        <p>&copy; 2024 Map Explorer. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Contact Us</a></p>
+        <p>&copy; 2024 (WTG) Group 4 - 4ITD | Chavez, Dalisay, Domingo, Gaya, Guiab | All rights reserved. | <a href="#">Privacy Policy</a> |
     </footer>
 
     <!-- Bootstrap JS and dependencies -->

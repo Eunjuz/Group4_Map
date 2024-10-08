@@ -4,22 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Map</title>
+    <title>Map - WTG</title>
 
-    <link rel="stylesheet" href="css/style.css">
-    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
-
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <!-- Geocoder -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 </head>
 
@@ -28,8 +19,7 @@
     <div id="sidebar">
         <div>
             <h2>Map Controls</h2>
-
-            <a href="homepage.html" class="btn map-btn">
+            <a href="{{ url_for('homepage') }}" class="btn map-btn">
                 <i class="fas fa-arrow-left"></i> Go Back
             </a>
 
@@ -50,10 +40,20 @@
             <button class="btn map-btn" id="measure-btn">
                 <i class="fas fa-ruler"></i> Measure Distance
             </button>
+
+            <button class="btn map-btn" id="finish-measure-btn">
+                <i class="fas fa-check"></i> Finish Measuring
+            </button>
+            
         </div>
     </div>
 
     <div id="map"></div>
+    
+    <!-- Display measured distance -->
+    <div id="distance-display" style="position: absolute; bottom: 10px; left: 10px; z-index: 1000; background: white; padding: 5px; border: 1px solid #ccc;">
+        Total Distance: <span id="total-distance">0</span> meters
+    </div>
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -68,6 +68,7 @@
     <script>
         var map = L.map('map').setView([14.5587, 121.1362], 14);
 
+        // Layers for different map providers
         var osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
@@ -82,10 +83,10 @@
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         });
 
+        // Layer switcher buttons
         document.getElementById('osm-layer-btn').addEventListener('click', function() {
             map.removeLayer(googleSat);
             map.removeLayer(googleStreets);
-
             if (!map.hasLayer(osmLayer)) {
                 osmLayer.addTo(map);
                 console.log("Open Street Added.");
@@ -95,7 +96,6 @@
         document.getElementById('google-streets-btn').addEventListener('click', function() {
             map.removeLayer(osmLayer);
             map.removeLayer(googleSat);
-
             if (!map.hasLayer(googleStreets)) {
                 googleStreets.addTo(map);
                 console.log("Google streets Added.");
@@ -105,37 +105,75 @@
         document.getElementById('google-sat-btn').addEventListener('click', function() {
             map.removeLayer(osmLayer);
             map.removeLayer(googleStreets);
-
             if (!map.hasLayer(googleSat)) {
                 googleSat.addTo(map);
                 console.log("Google satellite Added.");
             }
         });
 
-        // Measurement (basic version)
+        // Measurement functionality
         var measureLayer;
+        var markers = [];
+        var polyline;
+
         document.getElementById('measure-btn').addEventListener('click', function() {
             if (measureLayer) {
                 map.removeLayer(measureLayer);
+                markers = [];
+                if (polyline) {
+                    map.removeLayer(polyline);
+                    polyline = null;
+                }
             }
 
             measureLayer = L.layerGroup().addTo(map);
             map.on('click', function(e) {
-                L.marker(e.latlng).addTo(measureLayer);
+                const marker = L.marker(e.latlng).addTo(measureLayer);
+                markers.push(e.latlng);
+
+                if (markers.length > 1) {
+                    if (polyline) {
+                        map.removeLayer(polyline);
+                    }
+                    polyline = L.polyline(markers, { color: 'blue' }).addTo(map);
+                }
             });
         });
 
-        var geocoder = L.Control.Geocoder.nominatim();
+        document.getElementById('finish-measure-btn').addEventListener('click', function() {
+            if (markers.length < 2) {
+                alert('At least two points are required to measure distance.');
+                return;
+            }
 
-        // Search button event listener
+            const points = markers.map(marker => [marker.lat, marker.lng]);
+
+            // Send points to Flask for distance calculation
+            fetch('/calculate_distance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ points: points })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-distance').textContent = data.total_distance.toFixed(2);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Geocoding for searching locations
+        var geocoder = L.Control.Geocoder.nominatim();
         document.getElementById('search-btn').addEventListener('click', function() {
             var query = document.getElementById('search-bar').value;
 
-            // Use geocoder to get the location
             geocoder.geocode(query, function(results) {
                 if (results.length > 0) {
-                    var latlng = results[0].center; // Get the center of the first result
-                    map.setView(latlng, 14); // Move the map to the location
+                    var latlng = results[0].center;
+                    map.setView(latlng, 14);
                     L.marker(latlng).addTo(map).bindPopup(results[0].html || results[0].name).openPopup();
                     console.log("Moved to: ", latlng);
                 } else {
